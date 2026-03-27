@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Easter Egg Hunt</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.modal {
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.8);
+align-items:center;
+justify-content:center;
+}
+.egg-complete { border:4px solid #22c55e; border-radius:999px; }
+</style>
+</head>
+
+<body class="bg-blue-900 flex justify-center items-center min-h-screen">
+
+<img src="logo_white.png" 
+     class="absolute top-4 left-4 w-24 md:w-32 opacity-90">
+
+<div class="bg-white p-6 rounded-xl w-full max-w-2xl">
+
+<h1 class="text-xl font-bold mb-4">🐰 Easter Egg Hunt</h1>
+
+<div id="level-select">
+<button onclick="setLevel('A1')" class="bg-green-400 p-2 m-1">A1</button>
+<button onclick="setLevel('A2')" class="bg-yellow-400 p-2 m-1">A2</button>
+<button onclick="setLevel('B1')" class="bg-blue-400 p-2 m-1">B1</button>
+</div>
+
+<div id="game" class="hidden">
+<div id="activities" class="grid grid-cols-3 gap-3 mb-4"></div>
+
+<h3 class="font-bold">🐰 Bunny Journey</h3>
+<ul id="clues"></ul>
+
+<div class="mt-2 font-bold">Progress: <span id="progress">0</span>/5</div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+<div class="bg-white p-6 rounded-xl w-full max-w-xl">
+
+<h2 id="title" class="font-bold mb-2"></h2>
+<div id="content" class="max-h-[60vh] overflow-y-auto pr-2"></div>
+
+<div class="flex gap-2 mt-4">
+<button onclick="closeModal()" class="bg-gray-400 p-2 w-1/2">Back</button>
+<button onclick="checkAnswer()" class="bg-green-500 text-white p-2 w-1/2">Check</button>
+</div>
+
+</div>
+</div>
+
+<script>
+
+const eggImage="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-R1spcYLpFqcdOoeIsqV13hvV5aMsop.png&w=1000&q=75";
+
+let level=null, solved=0, currentKey=null;
+let completed={}, clues=[];
+
+function setLevel(l){
+level=l;
+document.getElementById("level-select").style.display="none";
+document.getElementById("game").classList.remove("hidden");
+renderButtons();
+}
+
+/* ================= DATABASE ================= */
+/* (Using the corrected structure with reading + questions) */
+
+const db={
+
+/* ================= 1 ================= */
+1:{
+clue:"🐰 The rabbit was hungry and went where students eat.",
+levels:{
+A1:{
+reading:"The Easter Bunny is very hungry today. He walks around the city looking for food. He finds a place where people eat meals. He eats carrots and vegetables. He is happy because the food is fresh and delicious.",
+questions:[
+{q:"Where does the bunny go?",options:["a place to eat","a school","a bank","a park"],a:"a place to eat"},
+{q:"What does he eat?",options:["carrots","books","phones","cars"],a:"carrots"},
+{q:"How is the food?",options:["delicious","bad","old","cold"],a:"delicious"},
+{q:"Why is he happy?",options:["because he eats","because he sleeps","because he runs","because he studies"],a:"because he eats"},
+{q:"The bunny is...",options:["hungry","tired","angry","sad"],a:"hungry"}
+]
+},
+A2:{
+reading:"The Easter Bunny is walking around the city because he is hungry. He is looking for a place to eat. Finally, he finds a restaurant where people are eating lunch. He orders vegetables and carrots. He enjoys the meal and feels happy after eating.",
+questions:[
+{q:"Why is the bunny walking?",options:["he is hungry","he is tired","he is lost","he is working"],a:"he is hungry"},
+{q:"Where does he eat?",options:["restaurant","school","bank","office"],a:"restaurant"},
+{q:"What does he order?",options:["vegetables and carrots","meat","pizza","fish"],a:"vegetables and carrots"},
+{q:"How does he feel after eating?",options:["happy","sad","angry","tired"],a:"happy"},
+{q:"What is he doing?",options:["looking for food","sleeping","studying","running"],a:"looking for food"}
+]
+},
+B1:{
+reading:"During Easter, the Easter Bunny travels through different places while preparing for the celebration. One day, he feels very hungry after a long journey. He decides to stop at a restaurant where people are sharing meals with their families. While eating vegetables and carrots, he reflects on how food is an important part of traditions, bringing people together and creating meaningful moments during celebrations.",
+questions:[
+{q:"Why does the bunny stop?",options:["he is hungry","he is bored","he is lost","he is tired"],a:"he is hungry"},
+{q:"What are people doing in the restaurant?",options:["sharing meals","sleeping","working","studying"],a:"sharing meals"},
+{q:"What does the bunny eat?",options:["vegetables and carrots","meat","dessert","fish"],a:"vegetables and carrots"},
+{q:"What does food represent?",options:["tradition and connection","technology","danger","work"],a:"tradition and connection"},
+{q:"Easter is described as...",options:["a meaningful celebration","a boring event","a work activity","a random day"],a:"a meaningful celebration"}
+]
+}
+}
+},
+
+/* ================= 2 ================= */
+2:{
+clue:"🐰 The rabbit wanted a book about Easter.",
+levels:{
+A1:{
+reading:"The Easter Bunny wants to learn more about Easter. He goes to a bookstore. He looks at many books. He finds a book about Easter traditions. He reads about eggs, chocolate, and celebrations. He feels happy because he learns new things.",
+questions:[
+{q:"Where does the bunny go?",options:["bookstore","restaurant","school","park"],a:"bookstore"},
+{q:"What does he find?",options:["a book","food","a car","a phone"],a:"a book"},
+{q:"What is the book about?",options:["Easter","sports","music","science"],a:"Easter"},
+{q:"How does he feel?",options:["happy","sad","angry","tired"],a:"happy"},
+{q:"What does he do?",options:["read","eat","sleep","run"],a:"read"}
+]
+},
+A2:{
+reading:"The Easter Bunny goes to a bookstore because he wants to learn about Easter traditions. He looks for a book that explains the meaning of Easter. He reads about eggs, chocolate, and family celebrations. After reading, he understands more about the holiday and feels satisfied.",
+questions:[
+{q:"Why does he go to the bookstore?",options:["to learn","to eat","to sleep","to run"],a:"to learn"},
+{q:"What does he read about?",options:["Easter traditions","sports","cars","music"],a:"Easter traditions"},
+{q:"What does he learn about?",options:["eggs and celebrations","technology","math","history"],a:"eggs and celebrations"},
+{q:"How does he feel after reading?",options:["satisfied","angry","tired","confused"],a:"satisfied"},
+{q:"What is his goal?",options:["learning","sleeping","running","eating"],a:"learning"}
+]
+},
+B1:{
+reading:"The Easter Bunny visits a bookstore to better understand the traditions behind Easter. He selects a book that explains the origins of the holiday, including the symbolism of eggs and the importance of family gatherings. As he reads, he realizes that Easter is not only about fun activities but also about cultural and historical meaning. This knowledge helps him appreciate the celebration more deeply.",
+questions:[
+{q:"Why does the bunny go to the bookstore?",options:["to understand Easter traditions","to buy food","to meet friends","to work"],a:"to understand Easter traditions"},
+{q:"What does the book explain?",options:["origins and symbolism","sports rules","technology","science"],a:"origins and symbolism"},
+{q:"What do eggs represent?",options:["symbolism","food only","decoration only","nothing"],a:"symbolism"},
+{q:"What does he realize?",options:["Easter has deeper meaning","Easter is boring","Easter is only food","Easter is work"],a:"Easter has deeper meaning"},
+{q:"What is the result?",options:["greater appreciation","confusion","boredom","tiredness"],a:"greater appreciation"}
+]
+}
+}
+},
+
+/* ================= 3 ================= */
+3:{
+clue:"🐰 The rabbit tried sushi for the first time.",
+levels:{
+A1:{
+reading:"The Easter Bunny goes to a restaurant. He tries sushi for the first time. Sushi has rice and fish. He likes the taste. He feels happy because he tries something new and interesting.",
+questions:[
+{q:"What does he try?",options:["sushi","pizza","bread","fruit"],a:"sushi"},
+{q:"What is sushi?",options:["food","car","book","place"],a:"food"},
+{q:"What is in sushi?",options:["rice and fish","meat and bread","fruit and milk","vegetables only"],a:"rice and fish"},
+{q:"How does he feel?",options:["happy","sad","angry","tired"],a:"happy"},
+{q:"Trying new food is...",options:["interesting","boring","bad","dangerous"],a:"interesting"}
+]
+},
+A2:{
+reading:"The Easter Bunny goes to a restaurant and decides to try sushi. Sushi is made with rice and fish. At first, he is unsure, but after tasting it, he enjoys it. Trying new food helps him learn about different cultures.",
+questions:[
+{q:"What does he try?",options:["sushi","pizza","bread","meat"],a:"sushi"},
+{q:"What is sushi made of?",options:["rice and fish","fruit and milk","bread and meat","water and sugar"],a:"rice and fish"},
+{q:"How does he feel at first?",options:["unsure","happy","angry","excited"],a:"unsure"},
+{q:"What happens after?",options:["he enjoys it","he leaves","he sleeps","he gets sick"],a:"he enjoys it"},
+{q:"Trying new food helps...",options:["learn about cultures","sleep","run","work"],a:"learn about cultures"}
+]
+},
+B1:{
+reading:"While exploring the city, the Easter Bunny decides to try sushi for the first time. Although he is unsure at the beginning, he quickly discovers that he enjoys the combination of flavors. This experience teaches him that trying new food can be a way to explore different cultures and expand one’s perspective. It also shows that stepping out of one’s comfort zone can lead to positive and enriching experiences.",
+questions:[
+{q:"Why does he try sushi?",options:["to explore","to save money","to avoid food","to work"],a:"to explore"},
+{q:"How does he feel at first?",options:["unsure","confident","angry","excited"],a:"unsure"},
+{q:"What does he discover?",options:["he enjoys it","he dislikes it","it is dangerous","it is expensive"],a:"he enjoys it"},
+{q:"What does the experience teach him?",options:["to explore cultures","to avoid food","to save money","to cook"],a:"to explore cultures"},
+{q:"What does stepping out of comfort zone bring?",options:["positive experiences","problems","fear","confusion"],a:"positive experiences"}
+]
+}
+}
+},
+
+/* ================= 4 ================= */
+4:{
+clue:"🐰 The rabbit decorated colorful eggs.",
+levels:{
+A1:{
+reading:"The Easter Bunny decorates eggs. He uses many colors like red, blue, and yellow. He paints the eggs and makes them beautiful. He is happy because decorating eggs is fun.",
+questions:[
+{q:"What does he decorate?",options:["eggs","books","cars","food"],a:"eggs"},
+{q:"What does he use?",options:["colors","water","sand","paper"],a:"colors"},
+{q:"Decorating is...",options:["fun","boring","sad","dangerous"],a:"fun"},
+{q:"He makes the eggs...",options:["beautiful","dirty","broken","small"],a:"beautiful"},
+{q:"He feels...",options:["happy","sad","angry","tired"],a:"happy"}
+]
+},
+A2:{
+reading:"The Easter Bunny decorates eggs using different colors and patterns. This is a popular Easter tradition. People enjoy decorating eggs because it is creative and fun. It is also a way to celebrate the holiday.",
+questions:[
+{q:"What does he decorate?",options:["eggs","books","cars","food"],a:"eggs"},
+{q:"What does he use?",options:["colors","metal","water","wood"],a:"colors"},
+{q:"Why do people decorate eggs?",options:["to celebrate","to destroy","to sell","to hide"],a:"to celebrate"},
+{q:"Decoration is...",options:["creative","dangerous","boring","loud"],a:"creative"},
+{q:"It is a...",options:["tradition","job","rule","problem"],a:"tradition"}
+]
+},
+B1:{
+reading:"Decorating eggs is one of the most well-known Easter traditions. The Easter Bunny spends time painting eggs with colorful patterns, representing creativity and new life. This activity is enjoyed by people of all ages and is often done with family and friends. It reflects the importance of tradition, creativity, and shared experiences during celebrations.",
+questions:[
+{q:"What does decorating eggs represent?",options:["new life","danger","war","technology"],a:"new life"},
+{q:"Who enjoys this activity?",options:["people of all ages","only children","only adults","only artists"],a:"people of all ages"},
+{q:"What values does it reflect?",options:["tradition and creativity","competition","technology","work"],a:"tradition and creativity"},
+{q:"Who do people decorate eggs with?",options:["family and friends","alone","strangers","teachers"],a:"family and friends"},
+{q:"This activity is...",options:["a tradition","a problem","a job","a rule"],a:"a tradition"}
+]
+}
+}
+},
+
+/* ================= 5 ================= */
+5:{
+clue:"🐰 The rabbit went to learn English.",
+levels:{
+A1:{
+reading:"The Easter Bunny goes to school. He wants to learn English. He says hello and goodbye. He studies every day. He is happy because he learns a new language.",
+questions:[
+{q:"Where does he go?",options:["school","restaurant","bank","park"],a:"school"},
+{q:"What does he learn?",options:["English","math","science","music"],a:"English"},
+{q:"Hello is...",options:["greeting","food","place","object"],a:"greeting"},
+{q:"He studies...",options:["every day","never","sometimes","once"],a:"every day"},
+{q:"He feels...",options:["happy","sad","angry","tired"],a:"happy"}
+]
+},
+A2:{
+reading:"The Easter Bunny goes to a school to learn English. He practices speaking and listening. Learning English helps him communicate with others around the world. He enjoys the process and feels motivated.",
+questions:[
+{q:"Why does he go to school?",options:["to learn English","to eat","to sleep","to run"],a:"to learn English"},
+{q:"What does he practice?",options:["speaking and listening","running","eating","sleeping"],a:"speaking and listening"},
+{q:"Learning English helps...",options:["communication","sleep","running","eating"],a:"communication"},
+{q:"How does he feel?",options:["motivated","sad","angry","tired"],a:"motivated"},
+{q:"English is used...",options:["around the world","in one place","nowhere","only at home"],a:"around the world"}
+]
+},
+B1:{
+reading:"The Easter Bunny decides to learn English in order to communicate with people from different countries. He attends classes regularly and practices all language skills, including speaking, listening, reading, and writing. He realizes that English is an international language that opens doors to new opportunities, cultures, and experiences. This motivates him to continue improving every day.",
+questions:[
+{q:"Why does he learn English?",options:["to communicate internationally","to avoid people","to work less","to travel less"],a:"to communicate internationally"},
+{q:"What skills does he practice?",options:["all language skills","only speaking","only writing","only reading"],a:"all language skills"},
+{q:"English is...",options:["an international language","a local language","a dead language","a difficult language"],a:"an international language"},
+{q:"What does English provide?",options:["opportunities and experiences","problems","limitations","confusion"],a:"opportunities and experiences"},
+{q:"What motivates him?",options:["new opportunities","fear","pressure","rules"],a:"new opportunities"}
+]
+}
+}
+}
+
+};
+
+
+/* ================= UI ================= */
+
+function renderButtons(){
+let c=document.getElementById("activities");
+c.innerHTML="";
+Object.keys(db).forEach(k=>{
+let div=document.createElement("div");
+div.onclick=()=>openActivity(k);
+div.innerHTML=`
+<div class="text-center cursor-pointer">
+<img src="${eggImage}" class="w-16 mx-auto ${completed[k]?'egg-complete':''}">
+<p>${completed[k]?"✅":"Egg "+k}</p>
+</div>`;
+c.appendChild(div);
+});
+}
+
+function openActivity(k){
+if(completed[k])return;
+currentKey=k;
+
+let data = db[k].levels[level];
+
+let html = `
+<h3 class="font-bold mb-2">📖 Read first:</h3>
+<p class="mb-3 p-3 bg-yellow-100 rounded">${data.reading}</p>
+`;
+
+data.questions.forEach((q,i)=>{
+html+=`<p class="mt-2 font-semibold">${q.q}</p>`;
+q.options.forEach(opt=>{
+html+=`<label class="block">
+<input type="radio" name="q${i}" value="${opt}"> ${opt}
+</label>`;
+});
+});
+
+document.getElementById("title").innerText="Egg "+k;
+document.getElementById("content").innerHTML=html;
+document.getElementById("modal").style.display="flex";
+}
+
+function checkAnswer(){
+
+let correctAll=true;
+
+let questions = db[currentKey].levels[level].questions;
+
+questions.forEach((q,i)=>{
+let selected=document.querySelector(`input[name="q${i}"]:checked`);
+if(!selected || selected.value!==q.a){
+correctAll=false;
+}
+});
+
+if(correctAll){
+completed[currentKey]=true;
+solved++;
+document.getElementById("progress").innerText=solved;
+
+clues.push(db[currentKey].clue);
+renderClues();
+
+closeModal();
+renderButtons();
+
+}else{
+alert("❌ Some answers are incorrect. Try again!");
+}
+}
+
+function renderClues(){
+let ul=document.getElementById("clues");
+ul.innerHTML="";
+clues.forEach(c=>{
+let li=document.createElement("li");
+li.innerText=c;
+ul.appendChild(li);
+});
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
