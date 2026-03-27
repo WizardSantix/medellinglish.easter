@@ -29,10 +29,29 @@ justify-content:center;
 
 <h1 class="text-xl font-bold mb-4">🐰 Easter Egg Hunt</h1>
 
-<div id="level-select">
-<button onclick="setLevel('A1')" class="bg-green-400 p-2 m-1">A1</button>
-<button onclick="setLevel('A2')" class="bg-yellow-400 p-2 m-1">A2</button>
-<button onclick="setLevel('B1')" class="bg-blue-400 p-2 m-1">B1</button>
+<div id="level-select" class="grid grid-cols-3 gap-4">
+
+<!-- A1 -->
+<div onclick="setLevel('A1')" class="cursor-pointer text-center hover:scale-105 transition">
+  <img src="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-7uzNN0YrOHMfME1JRXstP9EgkWw5lf.png&w=1000&q=75"
+       class="w-full rounded-xl shadow-md">
+  <p class="mt-2 font-bold">A1</p>
+</div>
+
+<!-- A2 -->
+<div onclick="setLevel('A2')" class="cursor-pointer text-center hover:scale-105 transition">
+  <img src="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-9Be3vPrwLlkNA90W04bLIBzD67rt4O.png&w=1000&q=75"
+       class="w-full rounded-xl shadow-md">
+  <p class="mt-2 font-bold">A2</p>
+</div>
+
+<!-- B1 -->
+<div onclick="setLevel('B1')" class="cursor-pointer text-center hover:scale-105 transition">
+  <img src="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-NknJtnMtlZ7M0vMk86iR7sU0bG7ycE.png&w=1000&q=75"
+       class="w-full rounded-xl shadow-md">
+  <p class="mt-2 font-bold">B1</p>
+</div>
+
 </div>
 
 <div id="game" class="hidden">
